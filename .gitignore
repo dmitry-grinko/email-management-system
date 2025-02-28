@@ -1,0 +1,5 @@
+./scripts/update-modules.sh
+
+./terraform/.terraform
+./terraform/variables.tfvars
+./terraform/.terraform.lock.hcl

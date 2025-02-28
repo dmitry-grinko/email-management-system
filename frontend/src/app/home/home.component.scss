@@ -1,0 +1,84 @@
+.app-home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background-color: #fff;
+
+  .hero-section {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1rem;
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+      }
+    }
+
+    p {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      color: #6c757d;
+
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+      }
+    }
+
+    .get-started-btn {
+      padding: 1rem 2.5rem;
+      font-size: 1.25rem;
+      border-radius: 10px;
+      border: none;
+      background-color: var(--bs-primary);
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      
+      @media (max-width: 768px) {
+        padding: 0.875rem 2rem;
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 0.75rem 1.75rem;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1.5rem 1rem;
+  }
+}
