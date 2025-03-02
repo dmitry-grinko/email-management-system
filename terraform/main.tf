@@ -76,9 +76,9 @@ module "api_gateway" {
   source = "./modules/api-gateway"
 
   allow_origins = ["https://${var.subdomain-name}.${var.root-domain}", "http://localhost:4200"]
-  name        = "${var.project-name}-api"
-  environment = var.environment
-  tags        = local.tags
+  name          = "${var.project-name}-api"
+  environment   = var.environment
+  tags          = local.tags
 
   integrations = {
     auth = {
