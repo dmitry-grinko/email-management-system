@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
+console.log('environment', environment); // TODO: Remove this
+
 @Injectable({
   providedIn: 'root'
 })
@@ -59,7 +61,7 @@ export class OAuthService {
       client_id: environment.googleClientId,
       redirect_uri: this.REDIRECT_URI,
       response_type: 'code',
-      scope: 'email profile https://www.googleapis.com/auth/gmail.modify',
+      scope: 'email profile https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.readonly',
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
       access_type: 'offline',

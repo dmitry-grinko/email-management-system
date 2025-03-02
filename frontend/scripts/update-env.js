@@ -13,6 +13,9 @@ if (!googleClientId) {
     process.exit(1);
 }
 
+console.log('backendUrl', backendUrl);
+console.log('googleClientId', googleClientId);
+
 const webSocketUrl = backendUrl.replace('https://', 'wss://');
 const connectionsUrl = `${backendUrl}/@connections`;
 
@@ -28,6 +31,10 @@ environments.forEach(file => {
     content = content.replace(/webSocketUrl:.*,/g, `webSocketUrl: '${webSocketUrl}',`);
     content = content.replace(/webSocketConnectionsUrl:.*,/g, `webSocketConnectionsUrl: '${connectionsUrl}',`);
     content = content.replace(/googleClientId:.*,/g, `googleClientId: '${googleClientId}',`);
+
+    console.log('content', content);
+
     fs.writeFileSync(filePath, content);
     console.log(`Updated ${file} with new environment variables`);
-}); 
+});
+
