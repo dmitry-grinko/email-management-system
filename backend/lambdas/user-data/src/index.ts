@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
 import { jwtDecode } from 'jwt-decode';
 
@@ -14,9 +14,6 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,DELETE'
 };
 
-interface AlertThreshold {
-  threshold: number;
-}
 
 export const handler = async (
   event: APIGatewayProxyEvent | APIGatewayProxyEventV2
@@ -100,35 +97,72 @@ export const handler = async (
     
     switch (method) {
       case 'POST': {
-        // Set new threshold
-        const body = JSON.parse(event.body || '{}') as AlertThreshold;
-        
-        if (typeof body.threshold !== 'number' || body.threshold <= 0) {
+        let body;
+        try {
+          body = JSON.parse('body' in event ? event.body! : event.body || '{}');
+        } catch (error) {
           return {
             statusCode: 400,
             headers: corsHeaders,
-            body: JSON.stringify({ message: 'Invalid threshold value' })
+            body: JSON.stringify({ message: 'Invalid request body' })
           };
         }
 
-        await docClient.send(new PutCommand({
-          TableName: tableName,
-          Item: {
-            UserId: userId,
-            threshold: body.threshold,
-            TTL: Math.floor(Date.now() / 1000) + (365 * 24 * 60 * 60) // TTL 1 year from now
-          }
-        }));
+        // Create update expression and attribute values dynamically
+        let updateExpression = 'SET';
+        const expressionAttributeNames: { [key: string]: string } = {};
+        const expressionAttributeValues: { [key: string]: any } = {};
+        
+        // Process each field in the body
+        Object.entries(body).forEach(([key, value], index) => {
+          const attributeName = `#attr${index}`;
+          const attributeValue = `:val${index}`;
+          
+          updateExpression += `${index === 0 ? '' : ','} ${attributeName} = ${attributeValue}`;
+          expressionAttributeNames[attributeName] = key;
+          expressionAttributeValues[attributeValue] = value;
+        });
 
-        return {
-          statusCode: 200,
-          headers: corsHeaders,
-          body: JSON.stringify({ message: 'Threshold set successfully' })
-        };
+        // If no fields to update
+        if (Object.keys(expressionAttributeValues).length === 0) {
+          return {
+            statusCode: 400,
+            headers: corsHeaders,
+            body: JSON.stringify({ message: 'No fields to update' })
+          };
+        }
+
+        try {
+          await docClient.send(new UpdateCommand({
+            TableName: tableName,
+            Key: {
+              UserId: userId
+            },
+            UpdateExpression: updateExpression,
+            ExpressionAttributeNames: expressionAttributeNames,
+            ExpressionAttributeValues: expressionAttributeValues
+          }));
+
+          return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify({ message: 'Data updated successfully' })
+          };
+        } catch (error) {
+          console.error('Error updating DynamoDB:', error);
+          return {
+            statusCode: 500,
+            headers: corsHeaders,
+            body: JSON.stringify({ message: 'Failed to update data' })
+          };
+        }
       }
 
       case 'GET': {
-        // Get current threshold
+        // Get specific data based on query parameters
+        const path = 'rawPath' in event ? event.rawPath : event.path;
+        const dataType = path?.split('/').pop(); // Get the last part of the path
+
         const response = await docClient.send(new GetCommand({
           TableName: tableName,
           Key: {
@@ -140,14 +174,32 @@ export const handler = async (
           return {
             statusCode: 404,
             headers: corsHeaders,
-            body: JSON.stringify({ message: 'No threshold found' })
+            body: JSON.stringify({ message: 'No data found' })
           };
         }
 
+        // If specific data type is requested (e.g., code_verifier, tokens)
+        if (dataType && dataType !== 'user-data') {
+          const requestedData = response.Item[dataType];
+          if (requestedData === undefined) {
+            return {
+              statusCode: 404,
+              headers: corsHeaders,
+              body: JSON.stringify({ message: `${dataType} not found` })
+            };
+          }
+          return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify({ [dataType]: requestedData })
+          };
+        }
+
+        // Return all user data
         return {
           statusCode: 200,
           headers: corsHeaders,
-          body: JSON.stringify({ threshold: response.Item.threshold })
+          body: JSON.stringify(response.Item)
         };
       }
 

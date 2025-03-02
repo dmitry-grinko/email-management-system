@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf } from '@angular/common';
+import { NgIf, CommonModule } from '@angular/common';
 import { WebSocketService, WebSocketMessage } from '../services/websocket.service';
 import { Subscription } from 'rxjs';
+import { OAuthButtonComponent } from './oauth-button/oauth-button.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,6 +13,8 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [
     NgbNavModule,
+    CommonModule,
+    OAuthButtonComponent
   ]
 })
 export class DashboardComponent implements OnInit, OnDestroy {

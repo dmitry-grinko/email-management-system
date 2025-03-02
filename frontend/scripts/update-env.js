@@ -7,6 +7,12 @@ if (!backendUrl) {
     process.exit(1);
 }
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+if (!googleClientId) {
+    console.error('GOOGLE_CLIENT_ID environment variable is not set');
+    process.exit(1);
+}
+
 const webSocketUrl = backendUrl.replace('https://', 'wss://');
 const connectionsUrl = `${backendUrl}/@connections`;
 
@@ -21,7 +27,7 @@ environments.forEach(file => {
     content = content.replace(/apiUrl:.*,/g, `apiUrl: '${backendUrl}',`);
     content = content.replace(/webSocketUrl:.*,/g, `webSocketUrl: '${webSocketUrl}',`);
     content = content.replace(/webSocketConnectionsUrl:.*,/g, `webSocketConnectionsUrl: '${connectionsUrl}',`);
-    
+    content = content.replace(/googleClientId:.*,/g, `googleClientId: '${googleClientId}',`);
     fs.writeFileSync(filePath, content);
     console.log(`Updated ${file} with new environment variables`);
 }); 
