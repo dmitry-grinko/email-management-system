@@ -27,8 +27,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.log('[DashboardComponent] Initializing...');
-    
+    // this.setupWebSocket(); // TODO: Uncomment this when the WebSocket is ready
+  }
+
+  setupWebSocket() {
     // Connect to WebSocket when component initializes
     console.log('[DashboardComponent] Attempting to connect to WebSocket');
     this.webSocketService.connect();

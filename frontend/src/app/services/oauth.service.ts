@@ -55,7 +55,7 @@ export class OAuthService {
     await this.storeCodeVerifier(codeVerifier);
     const codeChallenge = await this.createCodeChallenge(codeVerifier);
 
-    const params = new URLSearchParams({
+    const data = {
       client_id: environment.googleClientId,
       redirect_uri: this.REDIRECT_URI,
       response_type: 'code',
@@ -64,7 +64,15 @@ export class OAuthService {
       code_challenge_method: 'S256',
       access_type: 'offline',
       prompt: 'consent'
-    });
+    }
+
+    console.log('data', data);
+
+    const params = new URLSearchParams(data);
+
+    console.log('params', params);
+
+    console.log(`${this.GOOGLE_AUTH_URL}?${params.toString()}`);
 
     window.location.href = `${this.GOOGLE_AUTH_URL}?${params.toString()}`;
   }
