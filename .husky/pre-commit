@@ -1,0 +1,23 @@
+cd ../backend/lambdas/auth
+npm run lint
+
+cd ../backend/lambdas/connection
+npm run lint
+
+cd ../backend/lambdas/consumer
+npm run lint
+
+cd ../backend/lambdas/notion
+npm run lint
+
+cd ../backend/lambdas/openai
+npm run lint
+
+cd ../backend/lambdas/user-data
+npm run lint
+
+cd ../backend/lambdas/webhook
+npm run lint
+
+cd ../backend/lambdas/websocket
+npm run lint
