@@ -161,12 +161,12 @@ module "api_gateway" {
 
 # Add Step Functions module
 module "step_functions" {
-  source = "./modules/step-functions"
+  source                  = "./modules/step-functions"
   name                    = "${var.project-name}-ml-pipeline"
   tags                    = local.tags
   bucket_name             = module.s3_storage.bucket_id
-  openai_lambda_arn = module.openai_lambda.function_arn
-  notion_lambda_arn   = module.notion_lambda.function_arn
+  openai_lambda_arn       = module.openai_lambda.function_arn
+  notion_lambda_arn       = module.notion_lambda.function_arn
   websocket_sns_topic_arn = module.sns-websocket-topic.topic_arn
 }
 
