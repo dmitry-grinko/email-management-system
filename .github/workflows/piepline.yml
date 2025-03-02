@@ -363,6 +363,12 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Update environment variables
+        working-directory: frontend
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+        run: node scripts/update-env.js
+
       - name: Build Angular application
         working-directory: frontend
         env:
