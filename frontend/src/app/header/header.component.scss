@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+.nav-link.active {
+  color: var(--bs-primary) !important;
+  font-weight: 500;
+}
+
+.btn.active {
+  background-color: var(--bs-primary) !important;
+  color: white !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-outline-primary.active {
+  background-color: var(--bs-primary) !important;
+  color: white !important;
+}
+
+.btn {
+  min-width: 80px;
+}
+
+.navbar-toggler {
+  &:focus {
+    box-shadow: none;
+    outline: none;
+  }
+}
+
+@media (max-width: 991px) {
+  .navbar-brand {
+    span {
+      font-size: 1rem;
+    }
+  }
+
+  .navbar-collapse {
+    padding: 1.5rem 0;
+    
+    .navbar-nav {
+      gap: 1rem;
+    }
+  }
+}
+
+
