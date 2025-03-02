@@ -30,3 +30,8 @@ variable "connection_lambda_arn" {
   description = "ARN of the WebSocket connection lambda"
   type        = string
 } 
+
+variable "allow_origins" {
+  type        = list(string)
+  description = "List of allowed origins"
+}
