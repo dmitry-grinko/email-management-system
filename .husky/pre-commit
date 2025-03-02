@@ -21,3 +21,7 @@ npm run lint
 
 cd ../websocket
 npm run lint
+
+cd ../../../terraform
+terraform fmt
+terraform validate
