@@ -1,5 +1,5 @@
 {
-  "name": "openai-lambda",
+  "name": "webhook-lambda",
   "version": "1.0.0",
   "main": "dist/handler.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "test:coverage": "jest --coverage",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
-    "zip": "cd dist && cp -r ../node_modules . && zip -r ../openai-lambda.zip .",
+    "zip": "cd dist && cp -r ../node_modules . && zip -r ../webhook-lambda.zip .",
     "package": "npm run build && npm run zip",
     "dev": "tsc -w",
     "start": "npm run build && node dist/handler.js",
