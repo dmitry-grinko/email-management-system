@@ -1,23 +1,23 @@
-cd ../backend/lambdas/auth
+cd ./backend/lambdas/auth
 npm run lint
 
-cd ../backend/lambdas/connection
+cd ../connection
 npm run lint
 
-cd ../backend/lambdas/consumer
+cd ../consumer
 npm run lint
 
-cd ../backend/lambdas/notion
+cd ../notion
 npm run lint
 
-cd ../backend/lambdas/openai
+cd ../openai
 npm run lint
 
-cd ../backend/lambdas/user-data
+cd ../user-data
 npm run lint
 
-cd ../backend/lambdas/webhook
+cd ../webhook
 npm run lint
 
-cd ../backend/lambdas/websocket
+cd ../websocket
 npm run lint

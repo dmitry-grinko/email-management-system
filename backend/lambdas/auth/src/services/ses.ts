@@ -4,7 +4,7 @@ import {
     GetIdentityVerificationAttributesCommand,
     IdentityVerificationAttributes,
     ListIdentitiesCommand,
-    ListIdentitiesCommandOutput
+    ListIdentitiesCommandOutput,
 } from "@aws-sdk/client-ses";
 
 export class SESService {

@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2, APIGatewayProxyResult, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { CognitoService } from './services/cognito';
 import { LoginData, SignupData, VerifyEmailData, ForgotPasswordData, PasswordResetData } from './types';
-import { SESService } from './services/ses';
+// import { SESService } from './services/ses';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
