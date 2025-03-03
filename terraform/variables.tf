@@ -39,3 +39,7 @@ variable "root-domain" {
   type        = string
 }
 
+variable "google_cloud_topic_name" {
+  description = "Google Cloud Pub/Sub topic name"
+  type        = string
+}

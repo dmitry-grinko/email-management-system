@@ -15,7 +15,7 @@ interface TokenSaveBody {
   [key: string]: any;
 }
 
-export async function handlePostRequest(event: APIGatewayProxyEvent | APIGatewayProxyEventV2, userId: string, email: string): Promise<APIGatewayProxyResult> {
+export async function handlePostRequest(event: APIGatewayProxyEvent | APIGatewayProxyEventV2, userId: string, email: string, topicName: string): Promise<APIGatewayProxyResult> {
   let body: TokenSaveBody;
   try {
     body = JSON.parse('body' in event ? event.body! : event.body || '{}');
@@ -38,7 +38,7 @@ export async function handlePostRequest(event: APIGatewayProxyEvent | APIGateway
     if (isTokenSave) {
       logger.info('Processing token save operation', { userId, email });
       try {              
-        const watchData = await registerGmailWatch(body.access_token as string, email);
+        const watchData = await registerGmailWatch(body.access_token as string, email, topicName);
         
         if (watchData.historyId && watchData.expiration) {
           await updateGmailWatchData(userId, watchData.historyId, watchData.expiration);

@@ -72,6 +72,7 @@ module "user_data_lambda" {
   environment_variables = {
     USER_DATA_TABLE      = module.dynamodb_user_data.table_name
     COGNITO_USER_POOL_ID = module.cognito.user_pool_id
+    GOOGLE_CLOUD_TOPIC_NAME = var.google_cloud_topic_name
   }
 
   depends_on = [module.dynamodb_user_data]

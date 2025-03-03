@@ -1,7 +1,7 @@
 import { gmail_v1, auth } from '@googleapis/gmail';
 import { logger } from '../utils/logger';
 
-export async function registerGmailWatch(accessToken: string, userEmail: string) {
+export async function registerGmailWatch(accessToken: string, userEmail: string, topicName: string) {
   logger.info('Starting Gmail watch registration', { userId: userEmail });
   
   const oauth2Client = new auth.OAuth2();
@@ -14,7 +14,7 @@ export async function registerGmailWatch(accessToken: string, userEmail: string)
       userId: userEmail,
       requestBody: {
         labelIds: ['INBOX'],
-        topicName: `email-management-system-topic`
+        topicName,
       }
     });
     

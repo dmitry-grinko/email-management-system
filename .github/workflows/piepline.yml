@@ -17,6 +17,7 @@ env:
   TF_VAR_bucket-name: ${{ secrets.FRONTEND_S3_BUCKET_NAME }}
   TF_VAR_project-name: ${{ secrets.PROJECT_NAME }}
   TF_VAR_environment: 'dev'
+  TF_VAR_google_cloud_topic_name: ${{ secrets.GOOGLE_CLOUD_TOPIC_NAME }}
 permissions:
   id-token: write
   contents: read

@@ -3,6 +3,8 @@ import { logger } from './utils/logger';
 import { validateTokens } from './services/auth';
 import { handlePostRequest, handleGetRequest, corsHeaders } from './handlers/requestHandlers';
 
+const topicName = process.env.GOOGLE_CLOUD_TOPIC_NAME;
+
 export const handler = async (
   event: APIGatewayProxyEvent | APIGatewayProxyEventV2
 ): Promise<APIGatewayProxyResult> => {
@@ -63,7 +65,17 @@ export const handler = async (
     
     switch (method) {
       case 'POST':
-        return await handlePostRequest(event, tokenValidation.userId, tokenValidation.email);
+        if (!topicName) {
+          logger.error('Missing required environment variable', null, {
+            variableName: 'GOOGLE_CLOUD_TOPIC_NAME'
+          });
+          return {
+            statusCode: 500,
+            headers: corsHeaders,
+            body: JSON.stringify({ message: 'Internal server error' })
+          };
+        }
+        return await handlePostRequest(event, tokenValidation.userId, tokenValidation.email, topicName);
       case 'GET':
         return await handleGetRequest(event, tokenValidation.userId);
       default:
