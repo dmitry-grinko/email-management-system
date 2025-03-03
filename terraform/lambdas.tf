@@ -1,8 +1,8 @@
 # Google APIs Lambda Layer
 resource "aws_lambda_layer_version" "googleapis" {
   filename            = "../backend/lambda-layers/googleapis/googleapis-layer.zip"
-  layer_name         = "${var.project-name}-googleapis"
-  description        = "Google APIs Layer for Lambda functions"
+  layer_name          = "${var.project-name}-googleapis"
+  description         = "Google APIs Layer for Lambda functions"
   compatible_runtimes = ["nodejs20.x"]
 
   source_code_hash = filebase64sha256("../backend/lambda-layers/googleapis/googleapis-layer.zip")
