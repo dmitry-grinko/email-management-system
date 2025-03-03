@@ -77,26 +77,37 @@ export class OAuthService {
    * Exchanges the authorization code for tokens
    */
   public async getTokens(code: string): Promise<void> {
-    console.log('getTokens code:', code);
-    const codeVerifier = await this.getStoredCodeVerifier();
-    console.log('getTokens codeVerifier:', codeVerifier);
-    const response = await this.http.post<{
-      access_token: string;
-      refresh_token: string;
-      id_token: string;
-      expires_in: number;
-    }>(`${this.GOOGLE_TOKEN_URL}`, {
-      client_id: environment.googleClientId,
-      code,
-      redirect_uri: this.REDIRECT_URI,
-      code_verifier: codeVerifier,
-      grant_type: 'authorization_code'
-    }).toPromise();
+    try {
+      console.log('getTokens code:', code);
+      const codeVerifier = await this.getStoredCodeVerifier();
+      console.log('getTokens codeVerifier:', codeVerifier);
 
-    console.log('getTokens response:', response);
+      const formData = new URLSearchParams();
+      formData.append('client_id', environment.googleClientId);
+      formData.append('code', code);
+      formData.append('redirect_uri', this.REDIRECT_URI);
+      formData.append('code_verifier', codeVerifier);
+      formData.append('grant_type', 'authorization_code');
 
-    if (response) {
-      await this.saveTokens(response);
+      const response = await this.http.post<{
+        access_token: string;
+        refresh_token: string;
+        id_token: string;
+        expires_in: number;
+      }>(this.GOOGLE_TOKEN_URL, formData.toString(), {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).toPromise();
+
+      console.log('getTokens response:', response);
+
+      if (response) {
+        await this.saveTokens(response);
+      }
+    } catch (error) {
+      console.error('Error exchanging code for tokens:', error);
+      throw error;
     }
   }
 
