@@ -37,31 +37,35 @@ jobs:
           fi
           
           # Extract project ID and service account email from credentials
-          export TF_VAR_project_id=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .project_id)
-          export TF_VAR_service_account_email=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .client_email)
+          project_id=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .project_id)
+          service_account_email=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .client_email)
           
           # Verify extracted values
-          if [ -z "$TF_VAR_project_id" ]; then
+          if [ -z "$project_id" ]; then
             echo "Error: project_id not found in credentials"
             exit 1
           fi
-          if [ -z "$TF_VAR_service_account_email" ]; then
+          if [ -z "$service_account_email" ]; then
             echo "Error: client_email not found in credentials"
             exit 1
           fi
           
-          # Set default region and resource names
-          export TF_VAR_region="us-central1"
-          export TF_VAR_pubsub_topic_name="${TF_VAR_project_id}-topic"
-          export TF_VAR_pubsub_subscription_name="${TF_VAR_project_id}-subscription"
-          export TF_VAR_oauth_client_name="${TF_VAR_project_id}-oauth-client"
+          # Set and export variables to GITHUB_ENV
+          {
+            echo "TF_VAR_project_id=$project_id"
+            echo "TF_VAR_service_account_email=$service_account_email"
+            echo "TF_VAR_region=us-central1"
+            echo "TF_VAR_pubsub_topic_name=${project_id}-topic"
+            echo "TF_VAR_pubsub_subscription_name=${project_id}-subscription"
+            echo "TF_VAR_oauth_client_name=${project_id}-oauth-client"
+          } >> $GITHUB_ENV
           
-          echo "Project ID: $TF_VAR_project_id"
-          echo "Service Account: $TF_VAR_service_account_email"
-          echo "Region: $TF_VAR_region"
-          echo "Topic Name: $TF_VAR_pubsub_topic_name"
-          echo "Subscription Name: $TF_VAR_pubsub_subscription_name"
-          echo "OAuth Client Name: $TF_VAR_oauth_client_name"
+          echo "Project ID: $project_id"
+          echo "Service Account: $service_account_email"
+          echo "Region: us-central1"
+          echo "Topic Name: ${project_id}-topic"
+          echo "Subscription Name: ${project_id}-subscription"
+          echo "OAuth Client Name: ${project_id}-oauth-client"
 
       - name: Google Auth
         id: auth
