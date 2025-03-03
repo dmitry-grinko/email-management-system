@@ -9,9 +9,9 @@ terraform {
 resource "google_project_service" "cloud_resource_manager" {
   project = var.project_id
   service = "cloudresourcemanager.googleapis.com"
-  
+
   disable_dependent_services = false
-  disable_on_destroy = false
+  disable_on_destroy         = false
 
   timeouts {
     create = "30m"
@@ -32,7 +32,7 @@ resource "google_project_service" "required_apis" {
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy = false
+  disable_on_destroy         = false
 
   depends_on = [google_project_service.cloud_resource_manager]
 
@@ -63,7 +63,7 @@ resource "google_pubsub_subscription" "email_subscription" {
 resource "google_iap_brand" "project_brand" {
   support_email     = var.service_account_email
   application_title = "Email Management System"
-  project          = var.project_id
+  project           = var.project_id
 
   depends_on = [google_project_service.required_apis["iap.googleapis.com"]]
 }
