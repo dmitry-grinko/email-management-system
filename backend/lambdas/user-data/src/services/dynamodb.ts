@@ -9,31 +9,44 @@ const tableName = process.env.USER_DATA_TABLE!;
 export async function updateUserData(userId: string, data: Record<string, any>) {
   logger.info('Updating DynamoDB', { 
     userId,
-    updateFields: Object.keys(data)
+    updateFields: Object.keys(data),
+    totalFields: Object.keys(data).length
   });
   
-  const updateExpression = 'SET ' + Object.entries(data)
-    .map((key, index) => {
-      console.log('updateExpression: key of updateExpression', key);
+  const entries = Object.entries(data);
+  logger.debug('Processing entries', { 
+    numberOfEntries: entries.length,
+    entries: entries.map(([key]) => key)
+  });
+
+  const updateExpression = 'SET ' + entries
+    .map((entry, index) => {
+      console.log('updateExpression: key of updateExpression', entry);
       return `#attr${index} = :val${index}`
     })
     .join(', ');
     
-  const expressionAttributeNames = Object.entries(data)
-    .reduce((acc, [key, index]) => {
+  const expressionAttributeNames = entries
+    .reduce((acc, [key], index) => {
       console.log('expressionAttributeNames: key of expressionAttributeNames', key);
-      console.log('expressionAttributeNames: Object.keys(data)[index]', Object.keys(data)[index])
+      console.log('expressionAttributeNames: key value', key);
 
-      return { ...acc, [`#attr${index}`]: Object.keys(data)[index] }
+      return { ...acc, [`#attr${index}`]: key }
     }, {});
     
-  const expressionAttributeValues = Object.entries(data)
-    .reduce((acc, [key, index]) => {
+  const expressionAttributeValues = entries
+    .reduce((acc, [key, value], index) => {
       console.log('expressionAttributeValues: key of expressionAttributeValues', key);
-      console.log('expressionAttributeValues: Object.values(data)[index]', Object.values(data)[index])
+      console.log('expressionAttributeValues: value', value);
 
-      return { ...acc, [`:val${index}`]: Object.values(data)[index] }
+      return { ...acc, [`:val${index}`]: value }
     }, {});
+
+  logger.debug('DynamoDB update parameters', {
+    updateExpression,
+    expressionAttributeNames,
+    expressionAttributeValues
+  });
 
   await docClient.send(new UpdateCommand({
     TableName: tableName,
