@@ -5,6 +5,8 @@ import { NgIf, CommonModule } from '@angular/common';
 import { WebSocketService, WebSocketMessage } from '../services/websocket.service';
 import { Subscription } from 'rxjs';
 import { OAuthButtonComponent } from './oauth-button/oauth-button.component';
+import { ActivatedRoute } from '@angular/router';
+import { OAuthService } from '../services/oauth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,11 +25,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private modalService: NgbModal,
-    private webSocketService: WebSocketService
+    private webSocketService: WebSocketService,
+    private route: ActivatedRoute,
+    private oauthService: OAuthService
   ) {}
 
   ngOnInit() {
-    // this.setupWebSocket(); // TODO: Uncomment this when the WebSocket is ready
+    // Handle OAuth callback
+    this.route.queryParams.subscribe(params => {
+      const code = params['code'];
+      if (code) {
+        this.handleOAuthCallback(code);
+      }
+    });
+  }
+
+  private async handleOAuthCallback(code: string) {
+    try {
+      await this.oauthService.getTokens(code);
+      // You might want to show a success message or update the UI here
+      console.log('Successfully authenticated with Gmail');
+    } catch (error) {
+      console.error('Failed to exchange authorization code for tokens:', error);
+      // You might want to show an error message to the user here
+    }
   }
 
   setupWebSocket() {

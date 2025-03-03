@@ -77,8 +77,9 @@ export class OAuthService {
    * Exchanges the authorization code for tokens
    */
   public async getTokens(code: string): Promise<void> {
+    console.log('getTokens code:', code);
     const codeVerifier = await this.getStoredCodeVerifier();
-    
+    console.log('getTokens codeVerifier:', codeVerifier);
     const response = await this.http.post<{
       access_token: string;
       refresh_token: string;
@@ -125,35 +126,5 @@ export class OAuthService {
       id_token: tokens.id_token,
       token_expiry: new Date(Date.now() + tokens.expires_in * 1000).toISOString()
     }, { withCredentials: true }).toPromise();
-  }
-
-  /**
-   * Refreshes the access token using the refresh token
-   */
-  public async refreshAccessToken(): Promise<void> {
-    const storedTokens = await this.http.get<{
-      refresh_token: string;
-    }>(`${environment.apiUrl}/user-data/tokens`, { withCredentials: true }).toPromise();
-
-    if (!storedTokens?.refresh_token) {
-      throw new Error('No refresh token found');
-    }
-
-    const response = await this.http.post<{
-      access_token: string;
-      expires_in: number;
-    }>(`${this.GOOGLE_TOKEN_URL}`, {
-      client_id: environment.googleClientId,
-      refresh_token: storedTokens.refresh_token,
-      grant_type: 'refresh_token'
-    }).toPromise();
-
-    if (response) {
-      await this.saveTokens({
-        ...response,
-        refresh_token: storedTokens.refresh_token,
-        id_token: '' // New ID token is not provided in refresh flow
-      });
-    }
   }
 }

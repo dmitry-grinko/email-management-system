@@ -2,6 +2,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
 import { jwtDecode } from 'jwt-decode';
+import { google } from 'googleapis';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -14,6 +15,22 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,DELETE'
 };
 
+async function registerGmailWatch(accessToken: string, userId: string) {
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  
+  const gmail = google.gmail({ version: 'v1', auth });
+  
+  const response = await gmail.users.watch({
+    userId,
+    requestBody: {
+      labelIds: ['INBOX'],
+      topicName: `email-management-system-topic`
+    }
+  });
+
+  return response.data;
+}
 
 export const handler = async (
   event: APIGatewayProxyEvent | APIGatewayProxyEventV2
@@ -108,6 +125,9 @@ export const handler = async (
           };
         }
 
+        // Check if this is a token save operation
+        const isTokenSave = body.access_token && body.refresh_token;
+
         // Create update expression and attribute values dynamically
         let updateExpression = 'SET';
         const expressionAttributeNames: { [key: string]: string } = {};
@@ -133,6 +153,7 @@ export const handler = async (
         }
 
         try {
+          // Save the data first
           await docClient.send(new UpdateCommand({
             TableName: tableName,
             Key: {
@@ -142,6 +163,37 @@ export const handler = async (
             ExpressionAttributeNames: expressionAttributeNames,
             ExpressionAttributeValues: expressionAttributeValues
           }));
+
+          // If this was a token save, set up Gmail watch and push subscription
+          if (isTokenSave) {
+            try {              
+              // Then register Gmail watch
+              const watchData = await registerGmailWatch(body.access_token, userId);
+              
+              // Save the historyId from the watch response
+              if (watchData.historyId) {
+                await docClient.send(new UpdateCommand({
+                  TableName: tableName,
+                  Key: {
+                    UserId: userId
+                  },
+                  UpdateExpression: 'SET #historyId = :historyId, #expiration = :expiration',
+                  ExpressionAttributeNames: {
+                    '#historyId': 'historyId',
+                    '#expiration': 'watchExpiration'
+                  },
+                  ExpressionAttributeValues: {
+                    ':historyId': watchData.historyId,
+                    ':expiration': watchData.expiration
+                  }
+                }));
+              }
+            } catch (error) {
+              console.error('Error setting up Gmail watch and push subscription:', error);
+              // We don't want to fail the entire operation if setup fails
+              // but we should log it
+            }
+          }
 
           return {
             statusCode: 200,
