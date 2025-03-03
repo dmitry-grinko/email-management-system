@@ -22,6 +22,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          project_id: ${{ env.TF_VAR_project_id }}
+
       - name: Extract variables from credentials
         run: |
           # Extract project ID and service account email from credentials
