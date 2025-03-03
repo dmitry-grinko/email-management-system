@@ -131,11 +131,12 @@ export class OAuthService {
     id_token: string;
     expires_in: number;
   }): Promise<void> {
-    await this.http.post(`${environment.apiUrl}/user-data`, {
+    const response = await this.http.post(`${environment.apiUrl}/user-data`, {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       id_token: tokens.id_token,
       token_expiry: new Date(Date.now() + tokens.expires_in * 1000).toISOString()
     }, { withCredentials: true }).toPromise();
+    console.log('saveTokens response:', response);
   }
 }
