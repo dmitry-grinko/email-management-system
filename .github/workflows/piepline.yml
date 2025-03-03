@@ -238,6 +238,27 @@ jobs:
           path: backend/lambdas/webhook/webhook-lambda.zip
           retention-days: 5
 
+      # Google APIs Lambda Layer
+      - name: Install Google APIs layer dependencies
+        working-directory: backend/lambda-layers/googleapis/nodejs
+        run: npm ci
+
+      - name: Package Google APIs layer
+        working-directory: backend/lambda-layers/googleapis
+        run: |
+          cd nodejs && zip -r ../googleapis-layer.zip .
+          cd .. && if [ ! -f googleapis-layer.zip ]; then
+            echo "Error: googleapis-layer.zip was not created"
+            exit 1
+          fi
+
+      - name: Upload Google APIs layer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: googleapis-layer
+          path: backend/lambda-layers/googleapis/googleapis-layer.zip
+          retention-days: 5
+
   infrastructure:
     name: Deploy Infrastructure
     runs-on: ubuntu-latest
@@ -246,6 +267,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      # Google APIs Lambda Layer
+      - name: Download Google APIs Layer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: googleapis-layer
+          path: backend/lambda-layers/googleapis
 
       # Auth Lambda
       - name: Download Auth Lambda artifact

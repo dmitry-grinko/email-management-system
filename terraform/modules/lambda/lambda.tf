@@ -7,6 +7,7 @@ resource "aws_lambda_function" "function" {
   runtime         = var.runtime
   timeout         = var.timeout
   memory_size     = var.memory_size
+  layers          = var.layers
   
   source_code_hash = fileexists(var.filename) ? filebase64sha256(var.filename) : null
   package_type     = "Zip"

@@ -1,3 +1,13 @@
+# Google APIs Lambda Layer
+resource "aws_lambda_layer_version" "googleapis" {
+  filename            = "../backend/lambda-layers/googleapis/googleapis-layer.zip"
+  layer_name         = "${var.project-name}-googleapis"
+  description        = "Google APIs Layer for Lambda functions"
+  compatible_runtimes = ["nodejs20.x"]
+
+  source_code_hash = filebase64sha256("../backend/lambda-layers/googleapis/googleapis-layer.zip")
+}
+
 module "auth_lambda" {
   source = "./modules/lambda"
 
@@ -30,6 +40,7 @@ module "user_data_lambda" {
   log_retention_days = 14
   filename           = "../backend/lambdas/user-data/user-data-lambda.zip"
   tags               = local.tags
+  layers             = [aws_lambda_layer_version.googleapis.arn]
 
   additional_policies = [
     {
@@ -240,7 +251,6 @@ module "consumer_lambda" {
 
   environment_variables = {}
 }
-
 
 module "webhook_lambda" {
   source = "./modules/lambda"
