@@ -1,8 +1,8 @@
 {
   "name": "googleapis-lambda-layer",
   "version": "1.0.0",
-  "description": "Lambda layer for googleapis package",
+  "description": "Lambda layer for Gmail API",
   "dependencies": {
-    "googleapis": "^129.0.0"
+    "@googleapis/gmail": "^5.0.0"
   }
 } 

@@ -2,7 +2,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
 import { jwtDecode } from 'jwt-decode';
-import { google } from 'googleapis'; // We have a lambda layer for it. Added as a dev dependency.
+import { gmail_v1, auth } from '@googleapis/gmail';
 
 const ddbClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -16,10 +16,10 @@ const corsHeaders = {
 };
 
 async function registerGmailWatch(accessToken: string, userId: string) {
-  const auth = new google.auth.OAuth2();
-  auth.setCredentials({ access_token: accessToken });
+  const oauth2Client = new auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
   
-  const gmail = google.gmail({ version: 'v1', auth });
+  const gmail = new gmail_v1.Gmail({ auth: oauth2Client });
   
   const response = await gmail.users.watch({
     userId,
