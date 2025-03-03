@@ -2,51 +2,16 @@
 
 ## Description
 
-This repository is created to demonstrate the integration capabilities of OpenAI and Notion API. The idea is that when a user copies a specific email, pastes it into our frontend input, and clicks the 'Parse' button, the system parses this text and saves it in a specific table in our Notion app.
+This repository demonstrates an automated email management system that integrates Gmail API, OpenAI, and Notion API. The system intelligently processes your emails using OpenAI's advanced language models to extract key information, categorize content, and automatically organize it in your Notion database. This powerful integration helps you maintain a structured knowledge base from your email communications, making it easier to track important information, follow up on tasks, and maintain a searchable archive of your email correspondence.
 
 ## Stack
 
-Angular 19, AWS Lambda, S3, Terraform, Github Actions
+Angular 19, AWS Lambda, S3, Terraform, Github Actions, Gmail API, OpenAI API, Notion API
 
 ## Architecture
 
 ![Architecture](https://raw.githubusercontent.com/dmitry-grinko/email-management-system/refs/heads/main/image.png)
 
+## Updates
 
-## TODO
-
-#### Frontend:
-- Setup Angular app ✅
-- Environment Variables
-- Create auth components ✅
-- Auth Guards
-- Interceptor for API Headers
-- Notion API Service
-- S3 Service
-- User Data Service
-- OpenAI Service
-- Notification Service (API Gateway websockets)
-
-#### Backend:
-- AWS Congnito Authorization
-- S3Lambda
-- DataPreparationLambda
-- OpenAILambda
-- User Data Lambda
-- NotionAPILambda
-
-#### Infrastructure:
-- S3 bucket for the terraform state ✅
-- S3 bucket terraform module for frontend
-- S3 bucket terraform module to store emails
-- API GW module terraform module
-- CloudFront terraform module
-- Cognito terraform module
-- Step Functions terraform module
-- WAF terraform module
-- Lambda terraform module
-
-#### CI/CD:
-- Github Actions pipeline ✅
-- Github Actions secrets ✅
-- Script to update environment variables for Angular
+- 03/02/2025 - 03/03/2025 - integrating Gmail API

@@ -3,7 +3,7 @@ resource "aws_lambda_layer_version" "shared" {
   filename            = "../backend/lambda-layers/shared-layer/shared-layer.zip"
   layer_name          = "${var.project-name}-shared"
   compatible_runtimes = ["nodejs20.x"]
-  description         = "Shared layer containing common dependencies"
+  description         = "Shared layer containing Gmail API dependency"
   source_code_hash    = filebase64sha256("../backend/lambda-layers/shared-layer/shared-layer.zip")
 }
 
@@ -17,7 +17,6 @@ module "auth_lambda" {
   log_retention_days = 14
   filename           = "../backend/lambdas/auth/auth-lambda.zip"
   tags               = local.tags
-  layers             = [aws_lambda_layer_version.shared.arn]
 
   additional_policies = [
   ]
@@ -88,7 +87,6 @@ module "connection_lambda" {
   log_retention_days = 14
   filename           = "../backend/lambdas/connection/connection-lambda.zip"
   tags               = local.tags
-  layers             = [aws_lambda_layer_version.shared.arn]
 
   additional_policies = [
     {
@@ -150,7 +148,6 @@ module "websocket_lambda" {
   log_retention_days = 14
   filename           = "../backend/lambdas/websocket/websocket-lambda.zip"
   tags               = local.tags
-  layers             = [aws_lambda_layer_version.shared.arn]
 
   additional_policies = [
     {
@@ -212,7 +209,6 @@ module "openai_lambda" {
   log_retention_days = 14
   filename           = "../backend/lambdas/openai/openai-lambda.zip"
   tags               = local.tags
-  layers             = [aws_lambda_layer_version.shared.arn]
 
   additional_policies = []
 
@@ -231,7 +227,6 @@ module "notion_lambda" {
   log_retention_days = 14
   filename           = "../backend/lambdas/notion/notion-lambda.zip"
   tags               = local.tags
-  layers             = [aws_lambda_layer_version.shared.arn]
 
   additional_policies = []
 
@@ -250,26 +245,28 @@ module "consumer_lambda" {
   log_retention_days = 14
   filename           = "../backend/lambdas/consumer/consumer-lambda.zip"
   tags               = local.tags
-  layers             = [aws_lambda_layer_version.shared.arn]
 
   additional_policies = []
 
   environment_variables = {}
+
+  depends_on = []
 }
 
 module "webhook_lambda" {
   source = "./modules/lambda"
 
-  function_name      = "${var.project-name}-webhook-lambda"
+  function_name      = "${var.project-name}-webhook"
   environment        = var.environment
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
   filename           = "../backend/lambdas/webhook/webhook-lambda.zip"
   tags               = local.tags
-  layers             = [aws_lambda_layer_version.shared.arn]
 
   additional_policies = []
 
   environment_variables = {}
+
+  depends_on = []
 }
