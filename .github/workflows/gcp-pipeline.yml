@@ -58,6 +58,16 @@ jobs:
           pubsub_subscription_name = "${{ env.TF_VAR_pubsub_subscription_name }}"
           oauth_client_name = "${{ env.TF_VAR_oauth_client_name }}"
           EOF
+          echo "=== Contents of terraform.tfvars ==="
+          cat terraform.tfvars
+          echo "=================================="
+          echo "Checking if all required variables are set:"
+          grep -q "project_id" terraform.tfvars && echo "✓ project_id is set" || echo "✗ project_id is missing"
+          grep -q "region" terraform.tfvars && echo "✓ region is set" || echo "✗ region is missing"
+          grep -q "service_account_email" terraform.tfvars && echo "✓ service_account_email is set" || echo "✗ service_account_email is missing"
+          grep -q "pubsub_topic_name" terraform.tfvars && echo "✓ pubsub_topic_name is set" || echo "✗ pubsub_topic_name is missing"
+          grep -q "pubsub_subscription_name" terraform.tfvars && echo "✓ pubsub_subscription_name is set" || echo "✗ pubsub_subscription_name is missing"
+          grep -q "oauth_client_name" terraform.tfvars && echo "✓ oauth_client_name is set" || echo "✗ oauth_client_name is missing"
 
       - name: Remove State Lock
         run: |
@@ -70,7 +80,7 @@ jobs:
 
       - name: Terraform Format
         working-directory: terraform/gcp
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive *.tf
 
       - name: Terraform Init
         working-directory: terraform/gcp
