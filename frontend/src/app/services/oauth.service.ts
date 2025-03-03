@@ -68,13 +68,7 @@ export class OAuthService {
       prompt: 'consent'
     }
 
-    console.log('data', data);
-
     const params = new URLSearchParams(data);
-
-    console.log('params', params);
-
-    console.log(`${this.GOOGLE_AUTH_URL}?${params.toString()}`);
 
     window.location.href = `${this.GOOGLE_AUTH_URL}?${params.toString()}`;
   }
@@ -97,6 +91,8 @@ export class OAuthService {
       code_verifier: codeVerifier,
       grant_type: 'authorization_code'
     }).toPromise();
+
+    console.log('getTokens response:', response);
 
     if (response) {
       await this.saveTokens(response);
