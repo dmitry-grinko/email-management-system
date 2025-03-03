@@ -279,18 +279,43 @@ export const handler = async (
 
         case 'GET': {
           const path = 'rawPath' in event ? event.rawPath : event.path;
-          const dataType = path?.split('/').pop();
+          const pathDataType = path?.split('/').pop();
           
-          logger.info('Processing GET request', { userId, dataType });
+          // Get data type from either path parameter or query parameter
+          const queryParams = 'queryStringParameters' in event ? event.queryStringParameters : null;
+          const queryDataType = queryParams?.type;
+          
+          // Use path parameter first, then fall back to query parameter
+          const dataType = (pathDataType !== 'user-data' ? pathDataType : null) || queryDataType;
+          
+          logger.info('Processing GET request', { 
+            userId,
+            path,
+            pathDataType,
+            queryParams,
+            queryDataType,
+            finalDataType: dataType,
+            requestHeaders: event.headers
+          });
 
           try {
+            logger.debug('Fetching data from DynamoDB', {
+              userId,
+              tableName,
+              dataType
+            });
+
             const response = await docClient.send(new GetCommand({
               TableName: tableName,
               Key: { UserId: userId }
             }));
 
             if (!response.Item) {
-              logger.debug('No data found for user', { userId });
+              logger.debug('No data found for user', { 
+                userId,
+                tableName,
+                dataType 
+              });
               return {
                 statusCode: 404,
                 headers: corsHeaders,
@@ -301,19 +326,30 @@ export const handler = async (
             logger.debug('Successfully retrieved user data', { 
               userId,
               dataType,
-              availableFields: Object.keys(response.Item)
+              availableFields: Object.keys(response.Item),
+              hasRequestedData: dataType ? response.Item[dataType] !== undefined : true
             });
 
-            // If specific data type is requested (e.g., code_verifier, tokens)
-            if (dataType && dataType !== 'user-data') {
+            // If specific data type is requested (via path or query parameter)
+            if (dataType) {
               const requestedData = response.Item[dataType];
               if (requestedData === undefined) {
+                logger.debug('Requested data type not found', {
+                  userId,
+                  dataType,
+                  availableFields: Object.keys(response.Item)
+                });
                 return {
                   statusCode: 404,
                   headers: corsHeaders,
                   body: JSON.stringify({ message: `${dataType} not found` })
                 };
               }
+              logger.info('Successfully retrieved specific data type', {
+                userId,
+                dataType,
+                dataLength: typeof requestedData === 'string' ? requestedData.length : JSON.stringify(requestedData).length
+              });
               return {
                 statusCode: 200,
                 headers: corsHeaders,
@@ -322,6 +358,11 @@ export const handler = async (
             }
 
             // Return all user data
+            logger.info('Successfully retrieved all user data', {
+              userId,
+              availableFields: Object.keys(response.Item),
+              totalFields: Object.keys(response.Item).length
+            });
             return {
               statusCode: 200,
               headers: corsHeaders,
@@ -330,7 +371,10 @@ export const handler = async (
           } catch (error) {
             logger.error('Failed to retrieve data from DynamoDB', error, { 
               userId,
-              dataType 
+              dataType,
+              tableName,
+              errorName: error instanceof Error ? error.name : 'Unknown Error',
+              errorMessage: error instanceof Error ? error.message : String(error)
             });
             throw error;
           }

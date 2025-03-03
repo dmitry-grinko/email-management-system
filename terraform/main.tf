@@ -132,6 +132,10 @@ module "api_gateway" {
           path   = "/user-data"
         },
         {
+          method = "GET"
+          path   = "/user-data/{type}"
+        },
+        {
           method = "POST"
           path   = "/user-data"
         },
