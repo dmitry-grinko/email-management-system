@@ -72,7 +72,7 @@ jobs:
         working-directory: terraform/gcp
         run: |
           rm -f plan.tfplan
-          terraform plan -out=plan.tfplan
+          terraform plan -lock=false -out=plan.tfplan
 
       - name: Terraform Show
         working-directory: terraform/gcp
@@ -81,7 +81,7 @@ jobs:
       - name: Terraform Apply
         working-directory: terraform/gcp
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve plan.tfplan
+        run: terraform apply -lock=false -auto-approve plan.tfplan
 
       - name: Save OAuth Credentials
         if: github.ref == 'refs/heads/main'
