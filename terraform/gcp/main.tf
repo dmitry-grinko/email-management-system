@@ -30,7 +30,7 @@ resource "google_project_service" "fundamental_apis" {
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy = false
+  disable_on_destroy         = false
 
   depends_on = [
     google_project_iam_member.service_usage_admin,
@@ -56,7 +56,7 @@ resource "google_project_service" "required_apis" {
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy = false
+  disable_on_destroy         = false
 
   depends_on = [google_project_service.fundamental_apis]
 
