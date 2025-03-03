@@ -18,6 +18,23 @@ resource "google_project_iam_member" "service_management_admin" {
   member  = "serviceAccount:${var.service_account_email}"
 }
 
+resource "google_project_iam_member" "service_management_consumer" {
+  project = var.project_id
+  role    = "roles/servicemanagement.serviceConsumer"
+  member  = "serviceAccount:${var.service_account_email}"
+}
+
+# Add a time delay for IAM propagation
+resource "time_sleep" "wait_for_iam" {
+  depends_on = [
+    google_project_iam_member.service_usage_admin,
+    google_project_iam_member.service_management_admin,
+    google_project_iam_member.service_management_consumer
+  ]
+
+  create_duration = "30s"
+}
+
 # Enable fundamental APIs first
 resource "google_project_service" "fundamental_apis" {
   for_each = toset([
@@ -32,15 +49,19 @@ resource "google_project_service" "fundamental_apis" {
   disable_dependent_services = false
   disable_on_destroy         = false
 
-  depends_on = [
-    google_project_iam_member.service_usage_admin,
-    google_project_iam_member.service_management_admin
-  ]
+  depends_on = [time_sleep.wait_for_iam]
 
   timeouts {
     create = "30m"
     update = "40m"
   }
+}
+
+# Add a time delay for API enablement propagation
+resource "time_sleep" "wait_for_apis" {
+  depends_on = [google_project_service.fundamental_apis]
+
+  create_duration = "30s"
 }
 
 # Enable other required APIs
@@ -58,7 +79,7 @@ resource "google_project_service" "required_apis" {
   disable_dependent_services = false
   disable_on_destroy         = false
 
-  depends_on = [google_project_service.fundamental_apis]
+  depends_on = [time_sleep.wait_for_apis]
 
   timeouts {
     create = "30m"
