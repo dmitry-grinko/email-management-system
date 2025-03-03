@@ -13,17 +13,27 @@ export async function updateUserData(userId: string, data: Record<string, any>) 
   });
   
   const updateExpression = 'SET ' + Object.entries(data)
-    .map((entry, index) => {
-      console.log('entry of updateExpression', entry);
+    .map((key, index) => {
+      console.log('updateExpression: key of updateExpression', key);
       return `#attr${index} = :val${index}`
     })
     .join(', ');
     
   const expressionAttributeNames = Object.entries(data)
-    .reduce((acc, [key, index]) => ({ ...acc, [`#attr${index}`]: key }), {});
+    .reduce((acc, [key, index]) => {
+      console.log('expressionAttributeNames: key of expressionAttributeNames', key);
+      console.log('expressionAttributeNames: Object.keys(data)[index]', Object.keys(data)[index])
+
+      return { ...acc, [`#attr${index}`]: Object.keys(data)[index] }
+    }, {});
     
   const expressionAttributeValues = Object.entries(data)
-    .reduce((acc, [key, value]) => ({ ...acc, [`:val${Object.keys(data).indexOf(key)}`]: value }), {});
+    .reduce((acc, [key, index]) => {
+      console.log('expressionAttributeValues: key of expressionAttributeValues', key);
+      console.log('expressionAttributeValues: Object.values(data)[index]', Object.values(data)[index])
+
+      return { ...acc, [`:val${index}`]: Object.values(data)[index] }
+    }, {});
 
   await docClient.send(new UpdateCommand({
     TableName: tableName,
