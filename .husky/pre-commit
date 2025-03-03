@@ -25,3 +25,7 @@ npm run lint
 cd ../../../terraform/aws
 terraform fmt
 terraform validate
+
+cd ../gcp
+terraform fmt
+terraform validate

@@ -41,7 +41,7 @@ resource "google_project_service" "fundamental_apis" {
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy = false
+  disable_on_destroy         = false
 
   depends_on = [time_sleep.wait_for_iam]
 
@@ -70,7 +70,7 @@ resource "google_project_service" "required_apis" {
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy = false
+  disable_on_destroy         = false
 
   depends_on = [time_sleep.wait_for_apis]
 
@@ -80,12 +80,22 @@ resource "google_project_service" "required_apis" {
   }
 }
 
+# Add a time delay for API enablement propagation
+resource "time_sleep" "wait_for_required_apis" {
+  depends_on = [google_project_service.required_apis]
+
+  create_duration = "30s"
+}
+
 # Pub/Sub Topic
 resource "google_pubsub_topic" "email_topic" {
   name    = var.pubsub_topic_name
   project = var.project_id
 
-  depends_on = [google_project_service.required_apis["pubsub.googleapis.com"]]
+  depends_on = [
+    time_sleep.wait_for_required_apis,
+    google_project_service.required_apis["pubsub.googleapis.com"]
+  ]
 }
 
 # Pub/Sub Subscription
@@ -93,6 +103,15 @@ resource "google_pubsub_subscription" "email_subscription" {
   name    = var.pubsub_subscription_name
   topic   = google_pubsub_topic.email_topic.name
   project = var.project_id
+
+  expiration_policy {
+    ttl = "" # Never expire
+  }
+
+  retry_policy {
+    minimum_backoff = "10s"
+    maximum_backoff = "600s" # 10 minutes
+  }
 
   depends_on = [google_pubsub_topic.email_topic]
 }
@@ -103,7 +122,14 @@ resource "google_iap_brand" "project_brand" {
   application_title = "Email Management System"
   project           = var.project_id
 
-  depends_on = [google_project_service.required_apis["iap.googleapis.com"]]
+  depends_on = [
+    time_sleep.wait_for_required_apis,
+    google_project_service.required_apis["iap.googleapis.com"]
+  ]
+
+  lifecycle {
+    prevent_destroy = true # Prevent accidental deletion of IAP brand
+  }
 }
 
 # OAuth Client

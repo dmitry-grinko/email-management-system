@@ -1,9 +1,0 @@
-# Required variables (no defaults)
-project_id = "your-project-id"
-service_account_email = "your-service-account@your-project-id.iam.gserviceaccount.com"
-
-# Optional variables (have defaults)
-region = "us-central1"
-pubsub_topic_name = "email-management-topic"
-pubsub_subscription_name = "email-management-subscription"
-oauth_client_name = "email-management-oauth-client" 
