@@ -84,6 +84,7 @@ export class OAuthService {
 
       const formData = new URLSearchParams();
       formData.append('client_id', environment.googleClientId);
+      formData.append('client_secret', environment.googleClientSecret);
       formData.append('code', code);
       formData.append('redirect_uri', this.REDIRECT_URI);
       formData.append('code_verifier', codeVerifier);

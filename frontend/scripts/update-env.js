@@ -13,8 +13,11 @@ if (!googleClientId) {
     process.exit(1);
 }
 
-console.log('backendUrl', backendUrl);
-console.log('googleClientId', googleClientId);
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+if (!googleClientSecret) {
+    console.error('GOOGLE_CLIENT_SECRET environment variable is not set');
+    process.exit(1);
+}
 
 const webSocketUrl = backendUrl.replace('https://', 'wss://');
 const connectionsUrl = `${backendUrl}/@connections`;
@@ -30,9 +33,8 @@ environments.forEach(file => {
     content = content.replace(/apiUrl:.*,/g, `apiUrl: '${backendUrl}',`);
     content = content.replace(/webSocketUrl:.*,/g, `webSocketUrl: '${webSocketUrl}',`);
     content = content.replace(/webSocketConnectionsUrl:.*,/g, `webSocketConnectionsUrl: '${connectionsUrl}',`);
+    content = content.replace(/googleClientSecret:.*,/g, `googleClientSecret: '${googleClientSecret}',`);
     content = content.replace(/googleClientId:.*,/g, `googleClientId: '${googleClientId}',`);
-
-    console.log('content', content);
 
     fs.writeFileSync(filePath, content);
     console.log(`Updated ${file} with new environment variables`);
