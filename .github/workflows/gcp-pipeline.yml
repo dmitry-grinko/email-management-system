@@ -84,11 +84,15 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform/gcp
-        run: terraform init
+        run: |
+          terraform init -var-file=terraform.tfvars
+          echo "=== Provider Configuration ==="
+          terraform providers
+          echo "==========================="
 
       - name: Terraform Validate
         working-directory: terraform/gcp
-        run: terraform validate
+        run: terraform validate -var-file=terraform.tfvars
 
       - name: Terraform Plan
         working-directory: terraform/gcp
