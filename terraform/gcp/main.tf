@@ -12,15 +12,9 @@ resource "google_project_iam_member" "service_usage_admin" {
   member  = "serviceAccount:${var.service_account_email}"
 }
 
-resource "google_project_iam_member" "service_management_admin" {
+resource "google_project_iam_member" "project_iam_admin" {
   project = var.project_id
-  role    = "roles/servicemanagement.admin"
-  member  = "serviceAccount:${var.service_account_email}"
-}
-
-resource "google_project_iam_member" "service_management_consumer" {
-  project = var.project_id
-  role    = "roles/servicemanagement.serviceConsumer"
+  role    = "roles/resourcemanager.projectIamAdmin"
   member  = "serviceAccount:${var.service_account_email}"
 }
 
@@ -28,8 +22,7 @@ resource "google_project_iam_member" "service_management_consumer" {
 resource "time_sleep" "wait_for_iam" {
   depends_on = [
     google_project_iam_member.service_usage_admin,
-    google_project_iam_member.service_management_admin,
-    google_project_iam_member.service_management_consumer
+    google_project_iam_member.project_iam_admin
   ]
 
   create_duration = "30s"
@@ -40,14 +33,15 @@ resource "google_project_service" "fundamental_apis" {
   for_each = toset([
     "cloudresourcemanager.googleapis.com",
     "servicemanagement.googleapis.com",
-    "serviceusage.googleapis.com"
+    "serviceusage.googleapis.com",
+    "iam.googleapis.com"
   ])
 
   project = var.project_id
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy         = false
+  disable_on_destroy = false
 
   depends_on = [time_sleep.wait_for_iam]
 
@@ -61,7 +55,7 @@ resource "google_project_service" "fundamental_apis" {
 resource "time_sleep" "wait_for_apis" {
   depends_on = [google_project_service.fundamental_apis]
 
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 # Enable other required APIs
@@ -69,15 +63,14 @@ resource "google_project_service" "required_apis" {
   for_each = toset([
     "pubsub.googleapis.com",
     "iap.googleapis.com",
-    "oauth2.googleapis.com",
-    "iam.googleapis.com"
+    "oauth2.googleapis.com"
   ])
 
   project = var.project_id
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy         = false
+  disable_on_destroy = false
 
   depends_on = [time_sleep.wait_for_apis]
 
