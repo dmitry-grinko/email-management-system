@@ -5,6 +5,13 @@ terraform {
   }
 }
 
+# Grant Service Usage Admin role to the service account
+resource "google_project_iam_member" "service_usage_admin" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageAdmin"
+  member  = "serviceAccount:${var.service_account_email}"
+}
+
 # Enable Cloud Resource Manager API first
 resource "google_project_service" "cloud_resource_manager" {
   project = var.project_id
@@ -12,6 +19,8 @@ resource "google_project_service" "cloud_resource_manager" {
 
   disable_dependent_services = false
   disable_on_destroy         = false
+
+  depends_on = [google_project_iam_member.service_usage_admin]
 
   timeouts {
     create = "30m"
