@@ -24,9 +24,32 @@ jobs:
 
       - name: Extract variables from credentials
         run: |
+          # Check if GOOGLE_APPLICATION_CREDENTIALS exists
+          if [ -z "$TF_VAR_GOOGLE_APPLICATION_CREDENTIALS" ]; then
+            echo "Error: GOOGLE_APPLICATION_CREDENTIALS environment variable is not set"
+            exit 1
+          fi
+          
+          # Verify the credentials JSON is valid
+          if ! echo "$TF_VAR_GOOGLE_APPLICATION_CREDENTIALS" | jq -e . >/dev/null 2>&1; then
+            echo "Error: GOOGLE_APPLICATION_CREDENTIALS is not valid JSON"
+            exit 1
+          fi
+          
           # Extract project ID and service account email from credentials
           export TF_VAR_project_id=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .project_id)
           export TF_VAR_service_account_email=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .client_email)
+          
+          # Verify extracted values
+          if [ -z "$TF_VAR_project_id" ]; then
+            echo "Error: project_id not found in credentials"
+            exit 1
+          fi
+          if [ -z "$TF_VAR_service_account_email" ]; then
+            echo "Error: client_email not found in credentials"
+            exit 1
+          fi
+          
           # Set default region and resource names
           export TF_VAR_region="us-central1"
           export TF_VAR_pubsub_topic_name="${TF_VAR_project_id}-topic"
@@ -62,12 +85,26 @@ jobs:
           cat terraform.tfvars
           echo "=================================="
           echo "Checking if all required variables are set:"
-          grep -q "project_id" terraform.tfvars && echo "✓ project_id is set" || echo "✗ project_id is missing"
-          grep -q "region" terraform.tfvars && echo "✓ region is set" || echo "✗ region is missing"
-          grep -q "service_account_email" terraform.tfvars && echo "✓ service_account_email is set" || echo "✗ service_account_email is missing"
-          grep -q "pubsub_topic_name" terraform.tfvars && echo "✓ pubsub_topic_name is set" || echo "✗ pubsub_topic_name is missing"
-          grep -q "pubsub_subscription_name" terraform.tfvars && echo "✓ pubsub_subscription_name is set" || echo "✗ pubsub_subscription_name is missing"
-          grep -q "oauth_client_name" terraform.tfvars && echo "✓ oauth_client_name is set" || echo "✗ oauth_client_name is missing"
+          # Check if variables have non-empty values
+          project_id=$(grep "project_id" terraform.tfvars | cut -d'=' -f2 | tr -d ' "')
+          region=$(grep "region" terraform.tfvars | cut -d'=' -f2 | tr -d ' "')
+          service_account_email=$(grep "service_account_email" terraform.tfvars | cut -d'=' -f2 | tr -d ' "')
+          pubsub_topic_name=$(grep "pubsub_topic_name" terraform.tfvars | cut -d'=' -f2 | tr -d ' "')
+          pubsub_subscription_name=$(grep "pubsub_subscription_name" terraform.tfvars | cut -d'=' -f2 | tr -d ' "')
+          oauth_client_name=$(grep "oauth_client_name" terraform.tfvars | cut -d'=' -f2 | tr -d ' "')
+          
+          [ ! -z "$project_id" ] && echo "✓ project_id is set to: $project_id" || echo "✗ project_id is empty"
+          [ ! -z "$region" ] && echo "✓ region is set to: $region" || echo "✗ region is empty"
+          [ ! -z "$service_account_email" ] && echo "✓ service_account_email is set to: $service_account_email" || echo "✗ service_account_email is empty"
+          [ ! -z "$pubsub_topic_name" ] && echo "✓ pubsub_topic_name is set to: $pubsub_topic_name" || echo "✗ pubsub_topic_name is empty"
+          [ ! -z "$pubsub_subscription_name" ] && echo "✓ pubsub_subscription_name is set to: $pubsub_subscription_name" || echo "✗ pubsub_subscription_name is empty"
+          [ ! -z "$oauth_client_name" ] && echo "✓ oauth_client_name is set to: $oauth_client_name" || echo "✗ oauth_client_name is empty"
+          
+          # Exit if any required variable is empty
+          if [ -z "$project_id" ] || [ -z "$region" ] || [ -z "$service_account_email" ]; then
+            echo "Error: Required variables are empty"
+            exit 1
+          fi
 
       - name: Remove State Lock
         run: |
