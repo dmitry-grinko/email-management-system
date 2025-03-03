@@ -148,7 +148,7 @@ jobs:
       - name: Terraform Apply
         working-directory: terraform/gcp
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -var-file=terraform.tfvars -lock=false -auto-approve plan.tfplan
+        run: terraform apply -lock=false -auto-approve plan.tfplan
 
       - name: Save OAuth Credentials
         if: github.ref == 'refs/heads/main'
