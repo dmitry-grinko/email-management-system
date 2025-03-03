@@ -5,22 +5,37 @@ terraform {
   }
 }
 
-# Grant Service Usage Admin role to the service account
+# Grant required roles to the service account
 resource "google_project_iam_member" "service_usage_admin" {
   project = var.project_id
   role    = "roles/serviceusage.serviceUsageAdmin"
   member  = "serviceAccount:${var.service_account_email}"
 }
 
-# Enable Cloud Resource Manager API first
-resource "google_project_service" "cloud_resource_manager" {
+resource "google_project_iam_member" "service_management_admin" {
   project = var.project_id
-  service = "cloudresourcemanager.googleapis.com"
+  role    = "roles/servicemanagement.admin"
+  member  = "serviceAccount:${var.service_account_email}"
+}
+
+# Enable fundamental APIs first
+resource "google_project_service" "fundamental_apis" {
+  for_each = toset([
+    "cloudresourcemanager.googleapis.com",
+    "servicemanagement.googleapis.com",
+    "serviceusage.googleapis.com"
+  ])
+
+  project = var.project_id
+  service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy         = false
+  disable_on_destroy = false
 
-  depends_on = [google_project_iam_member.service_usage_admin]
+  depends_on = [
+    google_project_iam_member.service_usage_admin,
+    google_project_iam_member.service_management_admin
+  ]
 
   timeouts {
     create = "30m"
@@ -41,9 +56,9 @@ resource "google_project_service" "required_apis" {
   service = each.key
 
   disable_dependent_services = false
-  disable_on_destroy         = false
+  disable_on_destroy = false
 
-  depends_on = [google_project_service.cloud_resource_manager]
+  depends_on = [google_project_service.fundamental_apis]
 
   timeouts {
     create = "30m"
@@ -92,7 +107,7 @@ resource "google_project_iam_member" "pubsub_publisher" {
   member  = "serviceAccount:${var.service_account_email}"
 
   depends_on = [
-    google_project_service.cloud_resource_manager,
+    google_project_service.fundamental_apis,
     google_project_service.required_apis["iam.googleapis.com"]
   ]
 }
