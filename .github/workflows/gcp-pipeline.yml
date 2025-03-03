@@ -47,6 +47,18 @@ jobs:
           credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           project_id: ${{ env.TF_VAR_project_id }}
 
+      - name: Create terraform.tfvars
+        working-directory: terraform/gcp
+        run: |
+          cat > terraform.tfvars << EOF
+          project_id = "${{ env.TF_VAR_project_id }}"
+          region = "${{ env.TF_VAR_region }}"
+          service_account_email = "${{ env.TF_VAR_service_account_email }}"
+          pubsub_topic_name = "${{ env.TF_VAR_pubsub_topic_name }}"
+          pubsub_subscription_name = "${{ env.TF_VAR_pubsub_subscription_name }}"
+          oauth_client_name = "${{ env.TF_VAR_oauth_client_name }}"
+          EOF
+
       - name: Remove State Lock
         run: |
           gsutil rm gs://email-mamagement-app-tf-state-bucket/terraform/state/default.tflock || true
@@ -72,7 +84,7 @@ jobs:
         working-directory: terraform/gcp
         run: |
           rm -f plan.tfplan
-          terraform plan -lock=false -out=plan.tfplan
+          terraform plan -var-file=terraform.tfvars -lock=false -out=plan.tfplan
 
       - name: Terraform Show
         working-directory: terraform/gcp
@@ -81,7 +93,7 @@ jobs:
       - name: Terraform Apply
         working-directory: terraform/gcp
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -lock=false -auto-approve plan.tfplan
+        run: terraform apply -var-file=terraform.tfvars -lock=false -auto-approve plan.tfplan
 
       - name: Save OAuth Credentials
         if: github.ref == 'refs/heads/main'
