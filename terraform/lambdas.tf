@@ -4,7 +4,7 @@ resource "aws_lambda_layer_version" "shared" {
   layer_name          = "${var.project-name}-shared"
   compatible_runtimes = ["nodejs20.x"]
   description         = "Shared layer containing common dependencies"
-  source_code_hash = filebase64sha256("../backend/lambda-layers/shared-layer/shared-layer.zip")
+  source_code_hash    = filebase64sha256("../backend/lambda-layers/shared-layer/shared-layer.zip")
 }
 
 module "auth_lambda" {
