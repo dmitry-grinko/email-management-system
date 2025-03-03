@@ -92,7 +92,7 @@ jobs:
 
       - name: Terraform Validate
         working-directory: terraform/gcp
-        run: terraform validate -var-file=terraform.tfvars
+        run: terraform validate
 
       - name: Terraform Plan
         working-directory: terraform/gcp
