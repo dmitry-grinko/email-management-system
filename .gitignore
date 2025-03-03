@@ -4,7 +4,6 @@ terraform/.terraform
 terraform/variables.tfvars
 terraform/.terraform.lock.hcl
 
-docs
 
 # Lambda layers
 backend/lambda-layers/**/*.zip

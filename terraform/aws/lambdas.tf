@@ -1,10 +1,10 @@
 # Google APIs Lambda Layer
 resource "aws_lambda_layer_version" "shared" {
-  filename            = "../backend/lambda-layers/shared-layer/shared-layer.zip"
+  filename            = "../../backend/lambda-layers/shared-layer/shared-layer.zip"
   layer_name          = "${var.project-name}-shared"
   compatible_runtimes = ["nodejs20.x"]
   description         = "Shared layer containing Gmail API dependency"
-  source_code_hash    = filebase64sha256("../backend/lambda-layers/shared-layer/shared-layer.zip")
+  source_code_hash    = filebase64sha256("../../backend/lambda-layers/shared-layer/shared-layer.zip")
 }
 
 module "auth_lambda" {
@@ -15,7 +15,7 @@ module "auth_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/auth/auth-lambda.zip"
+  filename           = "../../backend/lambdas/auth/auth-lambda.zip"
   tags               = local.tags
 
   additional_policies = [
@@ -37,7 +37,7 @@ module "user_data_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/user-data/user-data-lambda.zip"
+  filename           = "../../backend/lambdas/user-data/user-data-lambda.zip"
   tags               = local.tags
   layers             = [aws_lambda_layer_version.shared.arn]
 
@@ -86,7 +86,7 @@ module "connection_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/connection/connection-lambda.zip"
+  filename           = "../../backend/lambdas/connection/connection-lambda.zip"
   tags               = local.tags
 
   additional_policies = [
@@ -147,7 +147,7 @@ module "websocket_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/websocket/websocket-lambda.zip"
+  filename           = "../../backend/lambdas/websocket/websocket-lambda.zip"
   tags               = local.tags
 
   additional_policies = [
@@ -208,7 +208,7 @@ module "openai_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/openai/openai-lambda.zip"
+  filename           = "../../backend/lambdas/openai/openai-lambda.zip"
   tags               = local.tags
 
   additional_policies = []
@@ -226,7 +226,7 @@ module "notion_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/notion/notion-lambda.zip"
+  filename           = "../../backend/lambdas/notion/notion-lambda.zip"
   tags               = local.tags
 
   additional_policies = []
@@ -244,7 +244,7 @@ module "consumer_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/consumer/consumer-lambda.zip"
+  filename           = "../../backend/lambdas/consumer/consumer-lambda.zip"
   tags               = local.tags
 
   additional_policies = []
@@ -262,7 +262,7 @@ module "webhook_lambda" {
   runtime            = "nodejs20.x"
   handler            = "index.handler"
   log_retention_days = 14
-  filename           = "../backend/lambdas/webhook/webhook-lambda.zip"
+  filename           = "../../backend/lambdas/webhook/webhook-lambda.zip"
   tags               = local.tags
 
   additional_policies = []

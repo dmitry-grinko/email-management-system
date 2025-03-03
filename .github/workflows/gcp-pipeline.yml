@@ -1,0 +1,100 @@
+name: GCP Pipeline
+
+on:
+  push:
+    paths:
+      - 'terraform/gcp/**'
+  workflow_dispatch:
+
+env:
+  TF_VAR_GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  infrastructure:
+    name: Deploy GCP Infrastructure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract variables from credentials
+        run: |
+          # Extract project ID and service account email from credentials
+          export TF_VAR_project_id=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .project_id)
+          export TF_VAR_service_account_email=$(echo $TF_VAR_GOOGLE_APPLICATION_CREDENTIALS | jq -r .client_email)
+          # Set default region and resource names
+          export TF_VAR_region="us-central1"
+          export TF_VAR_pubsub_topic_name="${TF_VAR_project_id}-topic"
+          export TF_VAR_pubsub_subscription_name="${TF_VAR_project_id}-subscription"
+          export TF_VAR_oauth_client_name="${TF_VAR_project_id}-oauth-client"
+          
+          echo "Project ID: $TF_VAR_project_id"
+          echo "Service Account: $TF_VAR_service_account_email"
+          echo "Region: $TF_VAR_region"
+          echo "Topic Name: $TF_VAR_pubsub_topic_name"
+          echo "Subscription Name: $TF_VAR_pubsub_subscription_name"
+          echo "OAuth Client Name: $TF_VAR_oauth_client_name"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Terraform Format
+        working-directory: terraform/gcp
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        working-directory: terraform/gcp
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: terraform/gcp
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: terraform/gcp
+        run: |
+          rm -f plan.tfplan
+          terraform plan -out=plan.tfplan
+
+      - name: Terraform Show
+        working-directory: terraform/gcp
+        run: terraform show plan.tfplan
+
+      - name: Terraform Apply
+        working-directory: terraform/gcp
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve plan.tfplan
+
+      - name: Save OAuth Credentials
+        if: github.ref == 'refs/heads/main'
+        working-directory: terraform/gcp
+        run: |
+          echo "GOOGLE_CLIENT_ID=$(terraform output -raw oauth_client_id)" >> $GITHUB_ENV
+          echo "GOOGLE_CLIENT_SECRET=$(terraform output -raw oauth_client_secret)" >> $GITHUB_ENV
+          echo "GOOGLE_CLOUD_TOPIC_NAME=$(terraform output -raw pubsub_topic_id)" >> $GITHUB_ENV
+
+  # destroy:
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+    
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: "1.5.0"
+
+  #     - name: Terraform Init
+  #       run: terraform -chdir=terraform/gcp init
+
+  #     - name: Terraform Destroy
+  #       run: terraform -chdir=terraform/gcp destroy -auto-approve
