@@ -11,26 +11,37 @@ data "google_project" "project" {
 }
 
 # Grant required roles to the service account
+resource "google_project_iam_member" "service_management_admin" {
+  project = data.google_project.project.project_id
+  role    = "roles/servicemanagement.admin"
+  member  = "serviceAccount:${var.service_account_email}"
+}
+
 resource "google_project_iam_member" "service_usage_admin" {
   project = data.google_project.project.project_id
   role    = "roles/serviceusage.serviceUsageAdmin"
   member  = "serviceAccount:${var.service_account_email}"
+
+  depends_on = [google_project_iam_member.service_management_admin]
 }
 
 resource "google_project_iam_member" "project_iam_admin" {
   project = data.google_project.project.project_id
   role    = "roles/resourcemanager.projectIamAdmin"
   member  = "serviceAccount:${var.service_account_email}"
+
+  depends_on = [google_project_iam_member.service_usage_admin]
 }
 
 # Add a time delay for IAM propagation
 resource "time_sleep" "wait_for_iam" {
   depends_on = [
+    google_project_iam_member.service_management_admin,
     google_project_iam_member.service_usage_admin,
     google_project_iam_member.project_iam_admin
   ]
 
-  create_duration = "30s"
+  create_duration = "60s"  # Increased wait time for better propagation
 }
 
 # Enable fundamental APIs first
