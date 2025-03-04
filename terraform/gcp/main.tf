@@ -10,51 +10,106 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# Enable Service Management API first
+resource "google_project_service" "service_management_api" {
+  project = data.google_project.project.project_id
+  service = "servicemanagement.googleapis.com"
+
+  disable_dependent_services = false
+  disable_on_destroy         = false
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+}
+
+# Wait for Service Management API to be enabled
+resource "time_sleep" "wait_service_management" {
+  depends_on = [google_project_service.service_management_api]
+  create_duration = "30s"
+}
+
 # Grant required roles to the service account
 resource "google_project_iam_member" "service_management_admin" {
   project = data.google_project.project.project_id
   role    = "roles/servicemanagement.admin"
   member  = "serviceAccount:${var.service_account_email}"
+  depends_on = [time_sleep.wait_service_management]
+}
+
+# Enable Service Usage API
+resource "google_project_service" "service_usage_api" {
+  project = data.google_project.project.project_id
+  service = "serviceusage.googleapis.com"
+
+  disable_dependent_services = false
+  disable_on_destroy         = false
+
+  depends_on = [google_project_iam_member.service_management_admin]
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+}
+
+# Wait for Service Usage API to be enabled
+resource "time_sleep" "wait_service_usage" {
+  depends_on = [google_project_service.service_usage_api]
+  create_duration = "30s"
 }
 
 resource "google_project_iam_member" "service_usage_admin" {
   project = data.google_project.project.project_id
   role    = "roles/serviceusage.serviceUsageAdmin"
   member  = "serviceAccount:${var.service_account_email}"
+  depends_on = [time_sleep.wait_service_usage]
+}
 
-  depends_on = [google_project_iam_member.service_management_admin]
+# Enable IAM API
+resource "google_project_service" "iam_api" {
+  project = data.google_project.project.project_id
+  service = "iam.googleapis.com"
+
+  disable_dependent_services = false
+  disable_on_destroy         = false
+
+  depends_on = [google_project_iam_member.service_usage_admin]
+
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
+}
+
+# Wait for IAM API to be enabled
+resource "time_sleep" "wait_iam_api" {
+  depends_on = [google_project_service.iam_api]
+  create_duration = "30s"
 }
 
 resource "google_project_iam_member" "project_iam_admin" {
   project = data.google_project.project.project_id
   role    = "roles/resourcemanager.projectIamAdmin"
   member  = "serviceAccount:${var.service_account_email}"
-
-  depends_on = [google_project_iam_member.service_usage_admin]
+  depends_on = [time_sleep.wait_iam_api]
 }
 
-# Add a time delay for IAM propagation
+# Add a time delay for all IAM propagation
 resource "time_sleep" "wait_for_iam" {
   depends_on = [
     google_project_iam_member.service_management_admin,
     google_project_iam_member.service_usage_admin,
     google_project_iam_member.project_iam_admin
   ]
-
-  create_duration = "60s" # Increased wait time for better propagation
+  create_duration = "60s"
 }
 
-# Enable fundamental APIs first
-resource "google_project_service" "fundamental_apis" {
-  for_each = toset([
-    "cloudresourcemanager.googleapis.com",
-    "servicemanagement.googleapis.com",
-    "serviceusage.googleapis.com",
-    "iam.googleapis.com"
-  ])
-
+# Enable Cloud Resource Manager API
+resource "google_project_service" "cloudresourcemanager_api" {
   project = data.google_project.project.project_id
-  service = each.key
+  service = "cloudresourcemanager.googleapis.com"
 
   disable_dependent_services = false
   disable_on_destroy         = false
@@ -67,10 +122,14 @@ resource "google_project_service" "fundamental_apis" {
   }
 }
 
-# Add a time delay for API enablement propagation
+# Wait for all fundamental APIs
 resource "time_sleep" "wait_for_apis" {
-  depends_on = [google_project_service.fundamental_apis]
-
+  depends_on = [
+    google_project_service.service_management_api,
+    google_project_service.service_usage_api,
+    google_project_service.iam_api,
+    google_project_service.cloudresourcemanager_api
+  ]
   create_duration = "60s"
 }
 
@@ -99,7 +158,6 @@ resource "google_project_service" "required_apis" {
 # Add a time delay for API enablement propagation
 resource "time_sleep" "wait_for_required_apis" {
   depends_on = [google_project_service.required_apis]
-
   create_duration = "30s"
 }
 
@@ -163,7 +221,7 @@ resource "google_project_iam_member" "pubsub_publisher" {
   member  = "serviceAccount:${var.service_account_email}"
 
   depends_on = [
-    google_project_service.fundamental_apis,
-    google_project_service.required_apis["iam.googleapis.com"]
+    google_project_service.iam_api,
+    time_sleep.wait_for_iam
   ]
 }
