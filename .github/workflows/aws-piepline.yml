@@ -345,28 +345,28 @@ jobs:
           terraform_version: "1.5.0"
 
       - name: Terraform Format
-        working-directory: terraform
+        working-directory: terraform/aws
         run: terraform fmt -check
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/aws
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: terraform/aws
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: terraform/aws
         run: |
           terraform plan -out=plan.tfplan
 
       - name: Terraform Show
-        working-directory: terraform
+        working-directory: terraform/aws
         run: terraform show plan.tfplan
 
       - name: Terraform Apply
-        working-directory: terraform
+        working-directory: terraform/aws
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve plan.tfplan
 
