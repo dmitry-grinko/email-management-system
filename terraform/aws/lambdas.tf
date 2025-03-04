@@ -264,10 +264,55 @@ module "webhook_lambda" {
   log_retention_days = 14
   filename           = "../../backend/lambdas/webhook/webhook-lambda.zip"
   tags               = local.tags
+  layers             = [aws_lambda_layer_version.shared.arn]
 
-  additional_policies = []
+  additional_policies = [
+    {
+      name = "dynamodb-user-data-access"
+      policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Effect = "Allow"
+            Action = [
+              "dynamodb:GetItem",
+              "dynamodb:PutItem"
+            ]
+            Resource = [
+              module.dynamodb_user_data.table_arn,
+              "${module.dynamodb_user_data.table_arn}/index/*"
+            ]
+          }
+        ]
+      })
+    },
+    {
+      name = "cognito-list-users"
+      policy = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Effect = "Allow"
+            Action = [
+              "cognito-idp:ListUsers"
+            ]
+            Resource = [
+              module.cognito.user_pool_arn
+            ]
+          }
+        ]
+      })
+    }
+  ]
 
-  environment_variables = {}
+  environment_variables = {
+    DYNAMODB_TABLE_NAME = module.dynamodb_user_data.table_name
+    COGNITO_USER_POOL_ID = module.cognito.user_pool_id
+  }
 
-  depends_on = []
+  depends_on = [
+    module.dynamodb_user_data,
+    module.cognito,
+    aws_lambda_layer_version.shared
+  ]
 }
