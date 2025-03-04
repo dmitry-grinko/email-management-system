@@ -14,14 +14,19 @@ if (!TABLE_NAME) {
 
 logInfo('DynamoDB service initialized', { tableName: TABLE_NAME });
 
-export interface UserHistory {
+export interface UserData {
   UserId: string;
   historyId: string;
-  accessToken: string;
+  access_token: string;
+  code_verifier: string;
+  id_token: string;
+  refresh_token: string;
+  token_expiry: string;
+  watchExpiration: string;
   updatedAt: string;
 }
 
-export async function getUserData(userId: string): Promise<UserHistory | null> {
+export async function getUserData(userId: string): Promise<UserData | null> {
   try {
     logInfo('Attempting to get user data from DynamoDB', { userId });
 
@@ -52,14 +57,21 @@ export async function getUserData(userId: string): Promise<UserHistory | null> {
     const userData = {
       UserId: response.Item.UserId,
       historyId: response.Item.historyId,
-      accessToken: response.Item.accessToken,
+      access_token: response.Item.access_token,
+      code_verifier: response.Item.code_verifier,
+      id_token: response.Item.id_token,
+      refresh_token: response.Item.refresh_token,
+      token_expiry: response.Item.token_expiry,
+      watchExpiration: response.Item.watchExpiration,
       updatedAt: response.Item.updatedAt
     };
 
     logInfo('Successfully retrieved user data', { 
       userId,
       historyId: userData.historyId,
-      hasAccessToken: !!userData.accessToken,
+      hasAccessToken: !!userData.access_token,
+      hasRefreshToken: !!userData.refresh_token,
+      tokenExpiry: userData.token_expiry,
       updatedAt: userData.updatedAt
     });
 
@@ -83,12 +95,23 @@ export async function getUserData(userId: string): Promise<UserHistory | null> {
   }
 }
 
-export async function updateUserData(userId: string, historyId: string, accessToken: string): Promise<void> {
+export async function updateUserData(
+  userId: string, 
+  historyId: string, 
+  accessToken: string,
+  codeVerifier: string,
+  idToken: string,
+  refreshToken: string,
+  tokenExpiry: string,
+  watchExpiration: string
+): Promise<void> {
   try {
     logInfo('Attempting to update user data in DynamoDB', { 
       userId,
       historyId,
-      hasAccessToken: !!accessToken
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken,
+      tokenExpiry
     });
 
     const updatedAt = new Date().toISOString();
@@ -97,7 +120,12 @@ export async function updateUserData(userId: string, historyId: string, accessTo
       Item: {
         UserId: userId,
         historyId,
-        accessToken,
+        access_token: accessToken,
+        code_verifier: codeVerifier,
+        id_token: idToken,
+        refresh_token: refreshToken,
+        token_expiry: tokenExpiry,
+        watchExpiration,
         updatedAt
       }
     });
@@ -106,7 +134,9 @@ export async function updateUserData(userId: string, historyId: string, accessTo
       tableName: TABLE_NAME,
       item: {
         ...command.input.Item,
-        accessToken: command.input.Item?.accessToken ? '[REDACTED]' : undefined
+        access_token: command.input.Item?.access_token ? '[REDACTED]' : undefined,
+        refresh_token: command.input.Item?.refresh_token ? '[REDACTED]' : undefined,
+        id_token: command.input.Item?.id_token ? '[REDACTED]' : undefined
       }
     });
 
