@@ -26,15 +26,15 @@ resource "google_project_service" "service_management_api" {
 
 # Wait for Service Management API to be enabled
 resource "time_sleep" "wait_service_management" {
-  depends_on = [google_project_service.service_management_api]
+  depends_on      = [google_project_service.service_management_api]
   create_duration = "30s"
 }
 
 # Grant required roles to the service account
 resource "google_project_iam_member" "service_management_admin" {
-  project = data.google_project.project.project_id
-  role    = "roles/servicemanagement.admin"
-  member  = "serviceAccount:${var.service_account_email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/servicemanagement.admin"
+  member     = "serviceAccount:${var.service_account_email}"
   depends_on = [time_sleep.wait_service_management]
 }
 
@@ -56,14 +56,14 @@ resource "google_project_service" "service_usage_api" {
 
 # Wait for Service Usage API to be enabled
 resource "time_sleep" "wait_service_usage" {
-  depends_on = [google_project_service.service_usage_api]
+  depends_on      = [google_project_service.service_usage_api]
   create_duration = "30s"
 }
 
 resource "google_project_iam_member" "service_usage_admin" {
-  project = data.google_project.project.project_id
-  role    = "roles/serviceusage.serviceUsageAdmin"
-  member  = "serviceAccount:${var.service_account_email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/serviceusage.serviceUsageAdmin"
+  member     = "serviceAccount:${var.service_account_email}"
   depends_on = [time_sleep.wait_service_usage]
 }
 
@@ -85,14 +85,14 @@ resource "google_project_service" "iam_api" {
 
 # Wait for IAM API to be enabled
 resource "time_sleep" "wait_iam_api" {
-  depends_on = [google_project_service.iam_api]
+  depends_on      = [google_project_service.iam_api]
   create_duration = "30s"
 }
 
 resource "google_project_iam_member" "project_iam_admin" {
-  project = data.google_project.project.project_id
-  role    = "roles/resourcemanager.projectIamAdmin"
-  member  = "serviceAccount:${var.service_account_email}"
+  project    = data.google_project.project.project_id
+  role       = "roles/resourcemanager.projectIamAdmin"
+  member     = "serviceAccount:${var.service_account_email}"
   depends_on = [time_sleep.wait_iam_api]
 }
 
@@ -157,7 +157,7 @@ resource "google_project_service" "required_apis" {
 
 # Add a time delay for API enablement propagation
 resource "time_sleep" "wait_for_required_apis" {
-  depends_on = [google_project_service.required_apis]
+  depends_on      = [google_project_service.required_apis]
   create_duration = "30s"
 }
 
