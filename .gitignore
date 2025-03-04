@@ -7,3 +7,7 @@ terraform/.terraform.lock.hcl
 
 # Lambda layers
 backend/lambda-layers/**/*.zip
+
+docs/email-mamagement-app-7b0bce572114.json
+docs/gcp-tfstate.sh
+docs/update-modules.sh
