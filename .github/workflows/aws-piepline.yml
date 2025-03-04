@@ -40,13 +40,13 @@ jobs:
           cache: 'npm'
 
       # Auth Lambda
-      # - name: Install auth lambda dependencies
-      #   working-directory: backend/lambdas/auth
-      #   run: npm ci
+      - name: Install auth lambda dependencies
+        working-directory: backend/lambdas/auth
+        run: npm ci
 
-      # - name: Lint auth lambda code
-      #   working-directory: backend/lambdas/auth
-      #   run: npm run lint
+      - name: Lint auth lambda code
+        working-directory: backend/lambdas/auth
+        run: npm run lint
 
       - name: Build and package auth lambda
         working-directory: backend/lambdas/auth
@@ -65,13 +65,13 @@ jobs:
           retention-days: 5
 
       # User Data Lambda
-      # - name: Install user data lambda dependencies
-      #   working-directory: backend/lambdas/user-data
-      #   run: npm ci
+      - name: Install user data lambda dependencies
+        working-directory: backend/lambdas/user-data
+        run: npm ci
 
-      # - name: Lint user data lambda code
-      #   working-directory: backend/lambdas/user-data
-      #   run: npm run lint
+      - name: Lint user data lambda code
+        working-directory: backend/lambdas/user-data
+        run: npm run lint
 
       - name: Build and package user data lambda
         working-directory: backend/lambdas/user-data
@@ -90,13 +90,13 @@ jobs:
           retention-days: 5
 
       # Connection Lambda
-      # - name: Install connection lambda dependencies
-      #   working-directory: backend/lambdas/connection
-      #   run: npm ci
+      - name: Install connection lambda dependencies
+        working-directory: backend/lambdas/connection
+        run: npm ci
 
-      # - name: Lint connection lambda code
-      #   working-directory: backend/lambdas/connection
-      #   run: npm run lint
+      - name: Lint connection lambda code
+        working-directory: backend/lambdas/connection
+        run: npm run lint
 
       - name: Build and package connection
         working-directory: backend/lambdas/connection
@@ -115,13 +115,13 @@ jobs:
           retention-days: 5
 
       # Websocket Lambda
-      # - name: Install websocket lambda dependencies
-      #   working-directory: backend/lambdas/websocket
-      #   run: npm ci
+      - name: Install websocket lambda dependencies
+        working-directory: backend/lambdas/websocket
+        run: npm ci
 
-      # - name: Lint websocket lambda code
-      #   working-directory: backend/lambdas/websocket
-      #   run: npm run lint
+      - name: Lint websocket lambda code
+        working-directory: backend/lambdas/websocket
+        run: npm run lint
 
       - name: Build and package websocket
         working-directory: backend/lambdas/websocket
@@ -140,13 +140,13 @@ jobs:
           retention-days: 5
 
       # OpenAI Lambda
-      # - name: Install openai lambda dependencies
-      #   working-directory: backend/lambdas/openai
-      #   run: npm ci
+      - name: Install openai lambda dependencies
+        working-directory: backend/lambdas/openai
+        run: npm ci
 
-      # - name: Lint openai lambda code
-      #   working-directory: backend/lambdas/openai
-      #   run: npm run lint
+      - name: Lint openai lambda code
+        working-directory: backend/lambdas/openai
+        run: npm run lint
 
       - name: Build and package openai
         working-directory: backend/lambdas/openai
@@ -165,13 +165,13 @@ jobs:
           retention-days: 5
 
       # Notion Lambda
-      # - name: Install notion lambda dependencies
-      #   working-directory: backend/lambdas/notion
-      #   run: npm ci
+      - name: Install notion lambda dependencies
+        working-directory: backend/lambdas/notion
+        run: npm ci
 
-      # - name: Lint notion lambda code
-      #   working-directory: backend/lambdas/notion
-      #   run: npm run lint
+      - name: Lint notion lambda code
+        working-directory: backend/lambdas/notion
+        run: npm run lint
 
       - name: Build and package notion
         working-directory: backend/lambdas/notion
@@ -190,13 +190,13 @@ jobs:
           retention-days: 5
 
       # Consumer Lambda
-      # - name: Install consumer lambda dependencies
-      #   working-directory: backend/lambdas/consumer
-      #   run: npm ci
+      - name: Install consumer lambda dependencies
+        working-directory: backend/lambdas/consumer
+        run: npm ci
 
-      # - name: Lint consumer lambda code
-      #   working-directory: backend/lambdas/consumer
-      #   run: npm run lint
+      - name: Lint consumer lambda code
+        working-directory: backend/lambdas/consumer
+        run: npm run lint
 
       - name: Build and package consumer
         working-directory: backend/lambdas/consumer
@@ -215,13 +215,13 @@ jobs:
           retention-days: 5
 
       # Webhook Lambda
-      # - name: Install webhook lambda dependencies
-      #   working-directory: backend/lambdas/webhook
-      #   run: npm ci
+      - name: Install webhook lambda dependencies
+        working-directory: backend/lambdas/webhook
+        run: npm ci
 
-      # - name: Lint webhook lambda code
-      #   working-directory: backend/lambdas/webhook
-      #   run: npm run lint
+      - name: Lint webhook lambda code
+        working-directory: backend/lambdas/webhook
+        run: npm run lint
 
       - name: Build and package webhook
         working-directory: backend/lambdas/webhook
