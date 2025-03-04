@@ -28,4 +28,3 @@ terraform validate
 
 cd ../gcp
 terraform fmt
-terraform validate

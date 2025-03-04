@@ -5,15 +5,20 @@ terraform {
   }
 }
 
+# Get the existing project
+data "google_project" "project" {
+  project_id = var.project_id
+}
+
 # Grant required roles to the service account
 resource "google_project_iam_member" "service_usage_admin" {
-  project = var.project_id
+  project = data.google_project.project.project_id
   role    = "roles/serviceusage.serviceUsageAdmin"
   member  = "serviceAccount:${var.service_account_email}"
 }
 
 resource "google_project_iam_member" "project_iam_admin" {
-  project = var.project_id
+  project = data.google_project.project.project_id
   role    = "roles/resourcemanager.projectIamAdmin"
   member  = "serviceAccount:${var.service_account_email}"
 }
@@ -37,7 +42,7 @@ resource "google_project_service" "fundamental_apis" {
     "iam.googleapis.com"
   ])
 
-  project = var.project_id
+  project = data.google_project.project.project_id
   service = each.key
 
   disable_dependent_services = false
@@ -66,7 +71,7 @@ resource "google_project_service" "required_apis" {
     "oauth2.googleapis.com"
   ])
 
-  project = var.project_id
+  project = data.google_project.project.project_id
   service = each.key
 
   disable_dependent_services = false
@@ -90,7 +95,7 @@ resource "time_sleep" "wait_for_required_apis" {
 # Pub/Sub Topic
 resource "google_pubsub_topic" "email_topic" {
   name    = var.pubsub_topic_name
-  project = var.project_id
+  project = data.google_project.project.project_id
 
   depends_on = [
     time_sleep.wait_for_required_apis,
@@ -102,7 +107,7 @@ resource "google_pubsub_topic" "email_topic" {
 resource "google_pubsub_subscription" "email_subscription" {
   name    = var.pubsub_subscription_name
   topic   = google_pubsub_topic.email_topic.name
-  project = var.project_id
+  project = data.google_project.project.project_id
 
   expiration_policy {
     ttl = "" # Never expire
@@ -120,7 +125,7 @@ resource "google_pubsub_subscription" "email_subscription" {
 resource "google_iap_brand" "project_brand" {
   support_email     = var.service_account_email
   application_title = "Email Management System"
-  project           = var.project_id
+  project           = data.google_project.project.project_id
 
   depends_on = [
     time_sleep.wait_for_required_apis,
@@ -142,7 +147,7 @@ resource "google_iap_client" "oauth_client" {
 
 # Add IAM binding for the service account to publish to Pub/Sub
 resource "google_project_iam_member" "pubsub_publisher" {
-  project = var.project_id
+  project = data.google_project.project.project_id
   role    = "roles/pubsub.publisher"
   member  = "serviceAccount:${var.service_account_email}"
 
