@@ -15,8 +15,6 @@ interface WebhookMessage {
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   try {
-    logInfo('Received webhook event', { event });
-
     if (!event.body) {
       throw new Error('No body in request');
     }
@@ -75,14 +73,18 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     // Fetch changes from Gmail API using stored access token
     const historyResponse = await getGmailHistory(userData.access_token, userData.historyId, newHistoryId);
     
+    logInfo('historyResponse', historyResponse);
+
     // Process new messages
     for (const message of historyResponse.messages) {
       const messageDetails = await getMessageDetails(userData.access_token, message.id);
-      logInfo('Processing new message', {
-        messageId: message.id,
-        threadId: message.threadId,
-        snippet: messageDetails.snippet
-      });
+
+      logInfo('messageDetails', messageDetails);
+      // logInfo('Processing new message', {
+      //   messageId: message.id,
+      //   threadId: message.threadId,
+      //   snippet: messageDetails.snippet
+      // });
       // TODO: Implement message processing logic here
     }
 
