@@ -306,7 +306,7 @@ module "webhook_lambda" {
   ]
 
   environment_variables = {
-    DYNAMODB_TABLE_NAME = module.dynamodb_user_data.table_name
+    DYNAMODB_TABLE_NAME  = module.dynamodb_user_data.table_name
     COGNITO_USER_POOL_ID = module.cognito.user_pool_id
   }
 
