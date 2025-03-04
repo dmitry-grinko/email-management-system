@@ -13,7 +13,8 @@ export async function registerGmailWatch(accessToken: string, userEmail: string,
     const response = await gmail.users.watch({
       userId: userEmail,
       requestBody: {
-        labelIds: ['INBOX'],
+        // labelIds: ['INBOX'], // For all emails
+        labelIds: ['Jobs'], // For emails with the 'Jobs' label
         topicName,
       }
     });
