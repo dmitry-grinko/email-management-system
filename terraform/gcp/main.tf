@@ -41,7 +41,7 @@ resource "time_sleep" "wait_for_iam" {
     google_project_iam_member.project_iam_admin
   ]
 
-  create_duration = "60s"  # Increased wait time for better propagation
+  create_duration = "60s" # Increased wait time for better propagation
 }
 
 # Enable fundamental APIs first
