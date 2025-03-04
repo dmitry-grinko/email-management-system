@@ -73,11 +73,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // Fetch changes from Gmail API using stored access token
-    const historyResponse = await getGmailHistory(userData.accessToken, userData.historyId, newHistoryId);
+    const historyResponse = await getGmailHistory(userData.access_token, userData.historyId, newHistoryId);
     
     // Process new messages
     for (const message of historyResponse.messages) {
-      const messageDetails = await getMessageDetails(userData.accessToken, message.id);
+      const messageDetails = await getMessageDetails(userData.access_token, message.id);
       logInfo('Processing new message', {
         messageId: message.id,
         threadId: message.threadId,
@@ -87,7 +87,16 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // Update user data with new history ID
-    await updateUserData(userId, newHistoryId, userData.accessToken);
+    await updateUserData(
+      userId,
+      newHistoryId,
+      userData.access_token,
+      userData.code_verifier,
+      userData.id_token,
+      userData.refresh_token,
+      userData.token_expiry,
+      userData.watchExpiration
+    );
 
     return {
       statusCode: 200,
